@@ -167,19 +167,37 @@ BOOST_SRC=$SRCDIR/boost_${BOOST_VERSION}
 
 #===============================================================================
 
-: ${DEVELOPER_DIR_PATH:="`xcode-select -print-path`"}
 
-if [ $XCODE_VERSION_MAJOR -eq 4 -a $XCODE_VERSION_MINOR -eq 5 ]
-then
-	ARM_DEV_DIR=${DEVELOPER_DIR_PATH}/Toolchains/XcodeDefault.xctoolchain/usr/bin
-	SIM_DEV_DIR=${ARM_DEV_DIR}
+# Find clang
+
+if [ $XCODE_VERSION_MAJOR -gt 4 -o $XCODE_VERSION_MAJOR -eq 4 -a $XCODE_VERSION_MINOR -gt 5 ]; then
+	
+	: ${COMPILER_ARM_PATH:=$(xcrun --sdk iphoneos --find clang)}
+	: ${AR_ARM_PATH:=$(xcrun --sdk iphoneos --find ar)}
+	
+	: ${COMPILER_SIM_PATH:=$(xcrun --sdk iphonesimulator --find clang)}
+	: ${AR_SIM_PATH:=$(xcrun --sdk iphonesimulator --find ar)}
+	
 else
-	ARM_DEV_DIR=${DEVELOPER_DIR_PATH}/Platforms/iPhoneOS.platform/Developer/usr/bin
-	SIM_DEV_DIR=${DEVELOPER_DIR_PATH}/Platforms/iPhoneSimulator.platform/Developer/usr/bin
+	
+	: ${DEVELOPER_DIR_PATH:="`xcode-select -print-path`"}
+	
+	if [ $XCODE_VERSION_MAJOR -eq 4 -a $XCODE_VERSION_MINOR -eq 5 ]; then
+		ARM_DEV_DIR=${DEVELOPER_DIR_PATH}/Toolchains/XcodeDefault.xctoolchain/usr/bin
+		SIM_DEV_DIR=${ARM_DEV_DIR}
+	else
+		ARM_DEV_DIR=${DEVELOPER_DIR_PATH}/Platforms/iPhoneOS.platform/Developer/usr/bin
+		SIM_DEV_DIR=${DEVELOPER_DIR_PATH}/Platforms/iPhoneSimulator.platform/Developer/usr/bin
+	fi
+	
+	: ${COMPILER_ARM_PATH:="${ARM_DEV_DIR}/clang"}
+	: ${COMPILER_SIM_PATH:="${SIM_DEV_DIR}/clang"}
+	
+	: ${AR_ARM_PATH:="${ARM_DEV_DIR}/ar"}
+	: ${AR_SIM_PATH:="${SIM_DEV_DIR}/ar"}
+	
 fi
 
-: ${COMPILER_ARM_PATH:="${ARM_DEV_DIR}/clang"}
-: ${COMPILER_SIM_PATH:="${SIM_DEV_DIR}/clang"}
 
 compilerFileName=`basename "$COMPILER_ARM_PATH"`
 if [[ $compilerFileName =~ ^gcc ]]
@@ -693,11 +711,11 @@ scrunchAllLibsTogetherInOneLibPerPlatform()
     echo "Linking each architecture into an uberlib ($ALL_LIBS => libboost.a )"
     rm $BUILDDIR/*/libboost.a
     echo ...armv6
-    (cd $BUILDDIR/armv6; $ARM_DEV_DIR/ar crus libboost.a obj/*.o; )
+    (cd $BUILDDIR/armv6; $AR_ARM_PATH crus libboost.a obj/*.o; )
     echo ...armv7
-    (cd $BUILDDIR/armv7; $ARM_DEV_DIR/ar crus libboost.a obj/*.o; )
+    (cd $BUILDDIR/armv7; $AR_ARM_PATH crus libboost.a obj/*.o; )
     echo ...i386
-    (cd $BUILDDIR/i386;  $SIM_DEV_DIR/ar crus libboost.a obj/*.o; )
+    (cd $BUILDDIR/i386;  $AR_SIM_PATH crus libboost.a obj/*.o; )
 }
 
 #===============================================================================
