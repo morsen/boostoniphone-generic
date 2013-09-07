@@ -391,7 +391,10 @@ patchBoost()
 		# Should include patches for libraries I do not use ?
 		doneSection
     ;;
-    1_50_0)
+# @todo - Once this fix gets into boost, will need to cut off this match
+# @see https://svn.boost.org/trac/boost/ticket/6686
+# Match 1_50_0 and above. It's possible that this doesn't cover all possible patterns
+    1_[5-9][0-9]_[0-9] | [2-9]_[0-9][0-9]_[0-9])
         echo Patching boost ...
         OLDDIR=`pwd`
         cd ${BOOST_SRC} && patch -p1 < ${OLDDIR}/patch/xcode_43.diff
@@ -494,17 +497,18 @@ retrieveAllBoostLibrariesRequiringSeparateBuild()
 {
     case $BOOST_HPP_VERSION in
     1_44_0)
-    retrieveAllBoostLibrariesRequiringSeparateBuild_1_44_0
-    ;;
+	    retrieveAllBoostLibrariesRequiringSeparateBuild_1_44_0
+	    ;;
     1_48_0)
-    retrieveAllBoostLibrariesRequiringSeparateBuild_1_48_0
-    ;;
-    1_50_0)
-    retrieveAllBoostLibrariesRequiringSeparateBuild_1_48_0
-    ;;
+	    retrieveAllBoostLibrariesRequiringSeparateBuild_1_48_0
+	    ;;
+# Match 1_50_0 and above. It's possible that this doesn't cover all possible patterns
+    1_[5-9][0-9]_[0-9] | [2-9]_[0-9][0-9]_[0-9])
+	    retrieveAllBoostLibrariesRequiringSeparateBuild_1_48_0
+	    ;;
     default )
-    abort "This version ($BOOST_HPP_VERSION) is not supported"
-    ;;
+	    abort "This version ($BOOST_HPP_VERSION) is not supported"
+	    ;;
     esac
 }
 
@@ -597,15 +601,18 @@ buildBoostForiPhoneOS()
         1_44_0)
             EXTRA_ARM_COMPILE_FLAGS="pch=off"
             EXTRA_SIM_COMPILE_FLAGS=""
-        ;;
+	        ;;
         1_48_0)
             EXTRA_ARM_COMPILE_FLAGS="pch=off"
             EXTRA_SIM_COMPILE_FLAGS=""
-        ;;
-        1_50_0)
+	        ;;
+# Match 1_50_0 and above. It's possible that this doesn't cover all possible patterns
+	    1_[5-9][0-9]_[0-9] | [2-9]_[0-9][0-9]_[0-9])
             EXTRA_ARM_COMPILE_FLAGS="pch=off"
             EXTRA_SIM_COMPILE_FLAGS=""
-        ;;
+	        ;;
+		* )
+			;;
     esac
 
 
@@ -848,9 +855,10 @@ case $BOOST_HPP_VERSION in
     1_4[48]_0)
         buildBoostForiPhoneOS
         ;;
-    1_5[0]_0)
+# Match 1_50_0 and above. It's possible that this doesn't cover all possible patterns
+    1_[5-9][0-9]_[0-9] | [2-9]_[0-9][0-9]_[0-9])
         buildBoostForiPhoneOS
-    ;;
+	    ;;
     default )
         abort "This version ($BOOST_HPP_VERSION) is not supported"
         ;;
