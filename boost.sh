@@ -446,9 +446,10 @@ unpackBoost()
         [ -d $BOOST_SRC ] || ( cd $SRCDIR; tar xfj $BOOST_TARBALL )
         [ -d $BOOST_SRC ] && echo "    ...unpacked as $BOOST_SRC"
     else
-        echo No source tarball available for version $BOOST_VERSION. Attempting to download Boost source from repository.
-        if [ $(svn co -r ${BOOST_VERSION} http://svn.boost.org/svn/boost/trunk ${BOOST_SRC}) -ne 0 ]
-        then
+        echo No source tarball available for version $BOOST_VERSION.
+		echo Downloading Boost source from repository.
+		svn co -q -r ${BOOST_VERSION} http://svn.boost.org/svn/boost/trunk ${BOOST_SRC}
+        if [ $? -ne 0 ]; then
             abort "    ...unable to download Boost source from repo"
         fi
     fi
